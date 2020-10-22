@@ -62,30 +62,6 @@ int main(int argc, char* argv[]){
 		return 1;
 	}
 
-	// open fs image using mmap
-	// int file_sz;
-	// void* filemap = (char*) get_memory_map(fd, &file_sz);
-	// printf("file sz: %d\n", file_sz);
-
-	// if (filemap == MAP_FAILED){
-	// 	printf("map failed\n");
-	// 	printf("map failed: %s\n", strerror(errno));	
-	// 	close(fd);
-	// 	return 1;
-	// }
-
-	// char cstr[8];
-	// struct superblock sb = rsblock(filemap, 128);
-	// struct dinode inode;
-	// int offset = sb.inodestart*512;
-	// for(int i=0; i<200; i++){
-	// 	inode = rinode((void* )((char*) filemap + offset), 1);
-	// 	offset += sizeof(struct dinode);
-	// 	printf("inode %d\n", i);
-	// 	pinode(inode);
-	// }
-
-	// close(fd);
 	run_check(fd);
 	return 0;
 }
@@ -118,11 +94,9 @@ void run_check(int fd){
 		}
 	}
 
-
 	// 2. For in-use inodes, each address that is used by inode is valid (points to a valid datablock address within the image). 
 	// If the direct block is used and is invalid, print ERROR: bad direct address in inode.; 
 	// if the indirect block is in use and is invalid, print ERROR: bad indirect address in inode.
-
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*) ((char*) filemap + offset), i);
 		if (!valid_direct_blocks(inode, FSSIZE - sb.nblocks, FSSIZE-1)){
@@ -137,10 +111,8 @@ void run_check(int fd){
 		}
 	}
 
-
 	// 3. Root directory exists, its inode number is 1, and the parent of the root directory is itself. 
 	// If not, print ERROR: root directory does not exist.
-
 	inode = rinode((void*)((char*) filemap + offset), 1);
 	struct dirent entry;
 	entry = rdirent(filemap, inode.addrs[0], 0);
@@ -159,7 +131,6 @@ void run_check(int fd){
 
 	// 4. Each directory contains . and .. entries, and the . entry points to the directory itself. 
 	// If not, print ERROR: directory not properly formatted.
-
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*)((char*) filemap + offset), i);
 		if (inode.type != T_DIR)
@@ -173,7 +144,6 @@ void run_check(int fd){
 
 	// 5. For in-use inodes, each address in use is also marked in use in the bitmap. 
 	// If not, print ERROR: address used by inode but marked free in bitmap.
-
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*)((char*) filemap + offset), i);
 		if (inode.type == 0)
@@ -187,7 +157,6 @@ void run_check(int fd){
 
 	// 6. For blocks marked in-use in bitmap, the block should actually be in-use in an inode or indirect block somewhere. 
 	// If not, print ERROR: bitmap marks block in use but it is not in use. 
-
  	int markedInUse[FSSIZE] = {};
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*)(char*) filemap + offset, i);
@@ -212,7 +181,6 @@ void run_check(int fd){
 
 	// 7. For in-use inodes, each direct address in use is only used once. 
 	// If not, print ERROR: direct address used more than once.
-
 	int inUse[FSSIZE] = {};
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*)(char*) filemap + offset, i);
@@ -267,7 +235,6 @@ void run_check(int fd){
 
 	// 9. For all inodes marked in use, each must be referred to in at least one directory. 
 	// If not, print ERROR: inode marked use but not found in a directory.
-
 	int inodeRefs[NINODES] = {}; // all inodes referred to in dirs
 
 	for(int i=1; i<NINODES; i++){
@@ -301,7 +268,6 @@ void run_check(int fd){
 
 	// 11. Reference counts (number of links) for regular files match the number of times file is referred to in directories 
 	// (i.e., hard links work correctly). If not, print ERROR: bad reference count for file.
-
 	int numLinks[NINODES] = {};
 	for(int i=1; i<NINODES; i++){
 		inode = rinode((void*)((char*)filemap + sb.inodestart*BSIZE), i);
@@ -319,16 +285,6 @@ void run_check(int fd){
 					exit(1);
 				}
 		} 
-		// if (inode.type == T_DIR) {
-		// 	if (i == 1 && numLinks[i] == 1 && inode.nlink == 1)
-		// 		continue;
-		// 	if (numLinks[i] != 2 || inode.nlink != numLinks[i]){
-		// 			printf("ERROR: directory appears more than once in file system.\n");
-		// 			printf("%d %d %d\n", i, inode.nlink, numLinks[i]);
-		// 			close(fd);
-		// 			exit(1);
-		// 	}
-		// } 
 	}
 
 	printf("done\n");
@@ -371,10 +327,6 @@ void update_ref_inodes(void* filemap, struct dinode inode, int* inodeRefs, bool 
 	}
 }
 
-
-
-
-
 void chartobinary(char c, char cstr[]){
 	for(int i=0; i<8;i++){
 		cstr[7-i] = (c & 1) == 0? '0': '1';
@@ -416,7 +368,6 @@ int rbit(void* bitmap_start, int blocknum){
 	char byte = *pointer;
 	return (int) ((byte >> (blocknum%8))) & 1;
 }
-
 
 bool valid_inuse_blocks(void* filemap, int nb_bmap, struct dinode inode){
 	for(int i=0; i<=NDIRECT; i++){
@@ -474,7 +425,6 @@ void pidirblock(struct indirect_block block){
 		printf("addr %d: %d\n", i, block.addrs[i]);
 }
 
-
 void pblock(void* filemap, int block_num){
 	char* pointer = (char*) filemap + block_num*BSIZE;
 	char cstr[8];
@@ -484,7 +434,6 @@ void pblock(void* filemap, int block_num){
 	}
 	printf("\n");
 }
-
 
 uint readint(int numval){
 	uint num = 0;
@@ -496,7 +445,6 @@ uint readint(int numval){
 	}
 	return num;
 }
-
 
 short readshort(short numval){
 	short num = 0;
@@ -530,7 +478,6 @@ bool valid_direct_blocks(struct dinode inode, int min_block_num, int max_block_n
 	}
 	return true;
 }
-
 
 bool valid_indirect_blocks(struct dinode inode, void * filemap, int min_block_num, int max_block_num) {
 	if (inode.addrs[NDIRECT] == 0)
@@ -586,71 +533,3 @@ struct dirent rdirent(void* filemap, int block_num, int entry_num) {
 
 	return dir_entry;
 }
-
-
-
-// check list
-
-// 1. Each inode is either unallocated or one of the valid types (T_FILE, T_DIR, T_DEV). If not, print ERROR: bad inode.
-//
-// iterate over all inodes, check type. check allocation, last block is meant for indirect address
-
-
-// 2. For in-use inodes, each address that is used by inode is valid
-//
-// check block validity. block is within range, and is indicated to be in use in bitmap
-
-// 3. Root directory exists, its inode number is 1, and the parent of the root directory is itself.
-//
-// read inode 1, nav to data block, read dirent and confirm inode numbers of ., .. entries
-
-
-// 4. Each directory contains . and .. entries, and the . entry points to the directory itself. 
-//
-// interate over all inodes, for dirs, nav to data block, read dirent, and confirm inode numbers of ., .. entries
-
-
-// 5. For in-use inodes, each address in use is also marked in use in the bitmap
-//
-// interate over all inodes, for each inode iterate over all data block address, if non zero, check bitmap entry for specific block number
-// if there is indirect block, read that block and iterate over it and check for each address entry
-
-
-// 6. For blocks marked in-use in bitmap, the block should actually be in-use in an inode or indirect block somewhere.
-//
-// build a hash table structure, where one can quickly check if a data block is in use. worst case it will take up NBLOCKS*sizeof(char) bytes
-// then iterate over bits in bitmap, and check against this data structure
-
-
-// 7. For in-use inodes, each direct address in use is only used once.
-//
-// same as 6, except that when one can check this when building the data structure
-
-
-// 8. For in-use inodes, each indirect address in use is only used once
-//
-// same as 7
-
-
-// 9. For all inodes marked in use, each must be referred to in at least one directory.
-//
-// build a data structure, that indicates all inodes referred to in a dir
-// then iteratre over all inodes, check if in use. if so, then check presence in data structure
-
-// 10. For each inode number that is referred to in a valid directory, it is actually marked in use. 
-//
-// build a data structure, that indicates all inodes referred to in a valid dir
-// check iteratre over the data structure, read in inode and verify that it is in use
-
-// 11. Reference counts (number of links) for regular files match the number of times file is referred to in directories (i.e., hard links work correctly)
-//
-// create a data structure, that references inode num against the number of references
-// iterate over all inode, if file inode, check num of links against those store in data structure
-
-
-// 12. No extra links allowed for directories  (each directory only appears in one other directory).
-//
-// iterate over all inodes, if a dir inode, verify that num links is exactly 2
-
-
-
