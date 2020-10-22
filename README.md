@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is a basic file system checker written in C language. Its job is to detect errors in a file system image provided to it as a binary. It is not targeted towards any of mainstream in-use filesystems out there (eg ext3/4, FAT etc), but an imaginary filesystem that has many of the important features of real-world file systems. As a result, this checker solves many of the same problems as any other real-world file system checker out there. For details on the types of sanity checks it performs refer to [project requirements](https://github.com/kasliwalr/intro_os_course/tree/master/project_assignments/p5/filesystems-checker) at Prof. Remzi's (U. Wisconsin) github repository. At this time, it has not been thoroughly tested, as for that I would need carefully generated "bad image" test cases, which I did not have, so this code has been run against a single "good image". Therefore, I can say with some confidence that it does not generate false error detections.  
+This is a basic file system checker written in C language. Its job is to detect errors in a file system image provided to it as a binary. It is not targeted towards any of mainstream in-use filesystems out there (eg ext3/4, FAT etc), but an imaginary filesystem that has many of the important features of real-world file systems. As a result, this checker solves many of the same problems as any other real-world file system checker out there. For details on the types of sanity checks it performs refer to [project requirements](https://github.com/remzi-arpacidusseau/ostep-projects/tree/master/filesystems-checker) at Prof. Remzi's (U. Wisconsin) github repository. At this time, it has not been thoroughly tested, as for that I would need carefully generated "bad image" test cases, which I did not have, so this code has been run against a single "good image". Therefore, I can say with some confidence that it does not generate false error detections.  
 
 Overall, this is work in progress, and I hope to add more thorough testing in future. Here are the instructions to use it.
 
@@ -40,7 +40,7 @@ Overall, this is work in progress, and I hope to add more thorough testing in fu
 ```
 
 The above shows the organization of the project. `src` directory contains all the src code (.c, .h files). `xcheck.c` contains the `main()` function. `fileio.h` contains function declartions for helper functions. To easily build the binary, you will need the `Makefile`
-You will find sufficient comment in the src code, to understand what is going on. `test` directory contains the good file system image `fs.img`
+You will find sufficient comment in the src code, to understand what is going on. `test` directory contains the good file system image `fs.img`. Note that `fs.h` contains some useful data structure definitions, this file has been copied from [MIT's xv6 code repository](https://github.com/mit-pdos/xv6-public)
 
 3. Installing & running
 
